@@ -89,26 +89,40 @@ class Time():
             return False
 
     def time_next(self, start):
-        print start
-        abs_minute = -1
-        abs_minute = -1
-        abs_hour = -1
-        second = 0
-        minute = 0
-        hour = 0
+        absolute = [datetime.datetime.now().year, datetime.datetime.now().month, datetime.datetime.now().day,
+                    datetime.datetime.now().hour, datetime.datetime.now().minute, datetime.datetime.now().second]
+        adder = [0, 0, 0, 0, 0, 0, 0]
+        # days - seconds - microse - milli - minutes - hours - weeks
 
         if self.__isFraction(self._minute):
             if self.__isPortion(self._minute):
-                second = self._minute[self._minute.index('.') + 1:]
+                adder[1] = int(self._minute[self._minute.index('.') + 1:])
             else:
-                minute = self._minute[self._minute.index('/') + 1:]
+                adder[4] = int(self._minute[self._minute.index('/') + 1:])
         elif not self._minute == '*':
-            abs_minute = self._minute
+            absolute[4] = int(self._minute)
 
         if self.__isFraction(self._hour):
-            hour = self._hour[self._hour.index('/') + 1:]
+            adder[5] = int(self._hour[self._hour.index('/') + 1:])
         elif not self._hour == '*':
-            abs_hour = self._hour
+            absolute[3] = int(self._hour)
+
+        if self.__isFraction(self._day):
+            adder[0] = int(self._day[self._day.index('/') + 1:])
+        elif not self._hour == '*':
+            absolute[2] = int(self._day)
+
+        if not self._week_day == '*':
+            abs_week_day = int(self._week_day)
+
+        if not self._month == '*':
+            absolute[1] = int(self._month)
+        future = datetime.datetime(*absolute) + datetime.timedelta(*adder)
+
+        return future
+
+
+
 
     @property
     def monday(self):
