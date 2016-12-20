@@ -14,13 +14,22 @@ import datetime
 class Thread(threading.Thread):
 
     def __init__(self, function, *args, **kwargs):
+        super(Thread, self).__init__()
         self.a = args
         self.k = kwargs
         threading.Thread.__init__(self)
+
+        self._stop = threading.Event()
         self.function = function
 
     def run(self):
         self.function(*self.a, **self.k)
+
+    def stop(self):
+        self._stop.set()
+
+    def stopped(self):
+        return self._stop.isSet()
 
 
 class JobFunction():
@@ -117,20 +126,3 @@ class Schedulling():
         return str(names)
 
 
-def daemon(*args):
-    print args[0]
-    print "Starting "
-    print "Exiting "
-
-
-c = Schedulling()
-
-c.addJob(daemon, 'primero', 'j1').every(5).seconds.monday
-
-c.addJob(daemon, '2', 'j2').every(3).seconds.monday
-
-c.addJob(daemon, '3', 'j3').every(4).seconds.monday
-
-c.startDaemon()
-
-print ' exit main'
