@@ -11,6 +11,7 @@ from crontab import Time
 import datetime
 
 class JobThread(threading.Thread):
+
     def __init__(self, function, *args, **kwargs):
         self.a = args
         self.k = kwargs
@@ -21,12 +22,22 @@ class JobThread(threading.Thread):
         self.function(*self.a, **self.k)
 
 
+class JobFunction():
+    def __init__(self, function, *args, **kwargs):
+        self.a = args
+        self.k = kwargs
+        self.function = function
+
+    def start(self):
+        self.function(*self.a, **self.k)
+
+
 class Job():
     def __init__(self, name='Job'):
         self.name = name
         self.time = Time()
         self.lastrun = None
-        self.nextrun = None
+        self.nextrun = datetime.datetime.now()
 
     def last_run(self, time):
         self.lastrun = time
@@ -38,13 +49,11 @@ class Job():
         self.nextrun = time
 
     def job(self, function, *args, **kwargs):
-        self.job = JobThread(function, *args, **kwargs)
+        self.job = JobFunction(function, *args, **kwargs)
 
     def start(self):
-        self.lastrun = datetime.datetime.time(datetime.datetime.now())
+        self.lastrun = datetime.datetime.now()
         self.nextrun = self.time.time_next(self.lastrun)
-
-        print self.nextrun
         self.job.start()
 
     def isAlive(self):
@@ -57,32 +66,30 @@ class Job():
         return self.time
 
 
-
-
     def __str__(self):
         return self.name
 
 
 class Scheduler():
-    ''' esta clase corre las funciones del schedullign'''
 
     def __init__(self, instance_schedulling):
         self.schedulling = instance_schedulling
-        job_scheduler = JobThread(self.scheduler)
+        job_scheduler = JobThread(self.schedulerDaemon)
         job_scheduler.start()
 
-    def scheduler(self):
+    def schedulerDaemon(self):
         ''' funcion que se encarga de ejecutar cada job en su momento '''
-        start_at = datetime.datetime.time(datetime.datetime.now())
+        while True:
+            for job in self.schedulling.jobs:
+                if datetime.datetime.now() > job.nextrun:
+                    job.start()
+            time.sleep(0.5)
 
-        print self.schedulling.jobs[0].start()
 
-        # while True:
-        #    time.sleep(1)
 
 
 class Schedulling():
-    ''' Clase para programar el scheduler, es una abstraccion para el usuario
+    ''' Class for programming the scheduler
 
     '''
 
@@ -98,6 +105,7 @@ class Schedulling():
     def startDaemon(self):
         scheduler = Scheduler(self)
 
+
     def get_jobs(self):
         return self.jobs
 
@@ -108,15 +116,20 @@ class Schedulling():
         return str(names)
 
 
-def daemon():
-    print 'daemo'
+def daemon(*args):
+    print args[0]
     print "Starting "
     print "Exiting "
 
 
 c = Schedulling()
 
-c.addJob(daemon, 'primero').every(20).seconds.monday
-print c.get_jobs()[0]
+c.addJob(daemon, 'primero', 'j1').every(5).seconds.monday
+
+c.addJob(daemon, '2', 'j2').every(3).seconds.monday
+
+c.addJob(daemon, '3', 'j3').every(4).seconds.monday
+
 c.startDaemon()
+
 print ' exit main'
