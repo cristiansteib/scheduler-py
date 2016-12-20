@@ -10,7 +10,8 @@ import time
 from crontab import Time
 import datetime
 
-class JobThread(threading.Thread):
+
+class Thread(threading.Thread):
 
     def __init__(self, function, *args, **kwargs):
         self.a = args
@@ -74,7 +75,7 @@ class Scheduler():
 
     def __init__(self, instance_schedulling):
         self.schedulling = instance_schedulling
-        job_scheduler = JobThread(self.schedulerDaemon)
+        job_scheduler = Thread(self.schedulerDaemon)
         job_scheduler.start()
 
     def schedulerDaemon(self):
