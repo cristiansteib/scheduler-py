@@ -50,13 +50,14 @@ class Time():
 
         if week_day != '*':
             week_day = str(week_day)
-            days = {0: ['sun', 'dom', '0', '7'],
-                    1: ['mon', 'lun', '1'],
-                    2: ['tue', 'mar', '2'],
-                    3: ['wed', 'mie' '3'],
-                    4: ['thu', 'jue', '4'],
-                    5: ['fri', 'vie' '5'],
-                    6: ['sat', 'sab' '6'],
+            days = {
+                0: ['mon', 'lun', '1'],
+                1: ['tue', 'mar', '2'],
+                2: ['wed', 'mie' '3'],
+                3: ['thu', 'jue', '4'],
+                4: ['fri', 'vie' '5'],
+                5: ['sat', 'sab' '6'],
+                6: ['sun', 'dom', '0', '7'],
                     }
 
             wk_day = False
@@ -89,10 +90,18 @@ class Time():
             return False
 
     def time_next(self, start):
+
+        def relative_weekday(wday):
+            relative_day = (wday - datetime.datetime.now().weekday())
+            relative_day = 7 + relative_day if relative_day < 0 else relative_day
+            return relative_day
+
+
         absolute = [datetime.datetime.now().year, datetime.datetime.now().month, datetime.datetime.now().day,
                     datetime.datetime.now().hour, datetime.datetime.now().minute, datetime.datetime.now().second]
         adder = [0, 0, 0, 0, 0, 0, 0]
         # days - seconds - microse - milli - minutes - hours - weeks
+
 
         if self.__isFraction(self._minute):
             if self.__isPortion(self._minute):
@@ -109,16 +118,17 @@ class Time():
 
         if self.__isFraction(self._day):
             adder[0] = int(self._day[self._day.index('/') + 1:])
-        elif not self._hour == '*':
+        elif not self._day == '*':
             absolute[2] = int(self._day)
 
         if not self._week_day == '*':
-            abs_week_day = int(self._week_day)
+            adder[0] = relative_weekday(self._week_day)
 
         if not self._month == '*':
             absolute[1] = int(self._month)
-        future = datetime.datetime(*absolute) + datetime.timedelta(*adder)
 
+        future = datetime.datetime(*absolute) + datetime.timedelta(*adder)
+        print future
         return future
 
 
